@@ -4,8 +4,8 @@ public class GaussianActivation implements ActivationFunction {
 
 	@Override
 	public double getOutput(double input) {
-		// TODO Auto-generated method stub
-		return 0;
+		// Change the function below, it's just a sigmoid for testing
+		return Math.pow(Math.E, input)/(Math.pow(Math.E, input)+1);
 	}
 
 	@Override

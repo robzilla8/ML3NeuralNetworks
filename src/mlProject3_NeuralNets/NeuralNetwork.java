@@ -66,5 +66,11 @@ public class NeuralNetwork {
 			}
 		}
 	}
+	
+	public void feedForward(ArrayList<Double> inputs) {
+		for (int i = 0; i < inputLayer.size(); i++) {
+			inputLayer.get(i).getInput(inputs.get(i));
+		}
+	}
 
 }

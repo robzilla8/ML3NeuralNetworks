@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class Node {
 	private ActivationFunction nodeActivationFunction; // the activation function this node will use
-	private Random rand = new Random(8); // random generator
+	private Random rand = new Random(); // random generator
 	private boolean mutable = true;
 	private double input = 0;
 	private double output = 0;
@@ -19,7 +19,7 @@ public class Node {
 	}
 	
 	public void addChild(Node n) {
-		addChild(n, rand.nextDouble()*2-1);
+		addChild(n, (rand.nextDouble()*2-1)*40);
 	}
 	
 	public void addChild(Node n, double weight) {
@@ -53,11 +53,13 @@ public class Node {
 	public void getInput(double singleNodeInput) {
 		input += singleNodeInput;
 		inputCounter++;
-		if (inputCounter == prevLayerNodes.size()) {
+		if (inputCounter >= prevLayerNodes.size()) {
+			//System.out.printf("Input = %f%n", input);
 			input = nodeActivationFunction.getOutput(input);
 			inputCounter = 0;
 			output = input;
 			input = 0;
+			//System.out.printf("Output = %f%n", output);
 			fire();
 		}
 	}
@@ -65,10 +67,13 @@ public class Node {
 	public void fire() {
 		if (nextLayerNodes.size() == 0) {
 			// todo: handle output layer
-			
+			System.out.printf("Output = %f%n", output);
 			return;
 		}
-		Node[] nextNodes = (Node[]) nextLayerNodes.keySet().toArray();
+		Node[] nextNodes = new Node[nextLayerNodes.keySet().toArray().length];
+		for (int i = 0; i < nextNodes.length; i++) {
+			nextNodes[i] = (Node) nextLayerNodes.keySet().toArray()[i];
+		}
 		for (int i = 0; i < nextLayerNodes.size(); i++) {
 			// sends the weight of the connection to a node in the next layer * the output of the activation function from this layer
 			nextNodes[i].getInput(nextLayerNodes.get(nextNodes[i])*output);
@@ -85,7 +90,7 @@ public class Node {
 			nextLayer[i] = (Node) nextLayerNodes.keySet().toArray()[i];
 		}
 		for (int i = 0; i < nextLayerNodes.size(); i++) {
-			System.out.printf("		- %f%n", nextLayerNodes.get(nextLayer[i]));
+			System.out.printf("		# %f%n", nextLayerNodes.get(nextLayer[i]));
 		}
 		System.out.println();
 	}
