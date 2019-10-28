@@ -26,6 +26,18 @@ public class Node {
 		nextLayerNodes.put(n, weight);
 	}
 	
+	public void addParent(Node parent) {
+		prevLayerNodes.add(parent);
+	}
+	
+	public Node[] getChildren() {
+		Node[] nextLayer = new Node[nextLayerNodes.keySet().toArray().length];
+		for (int i = 0; i < nextLayer.length; i++) {
+			nextLayer[i] = (Node) nextLayerNodes.keySet().toArray()[i];
+		}
+		return nextLayer;
+	}
+	
 	public void changeMutable() {
 		mutable = !mutable;
 	}
@@ -62,5 +74,19 @@ public class Node {
 			nextNodes[i].getInput(nextLayerNodes.get(nextNodes[i])*output);
 		}
 	}
-
+	
+	public void printInfo() {
+		System.out.printf("%n-----Node Values-----%n");
+		System.out.printf("	Number of nodes in next layer: %d%n", nextLayerNodes.size());
+		System.out.printf("	Number of nodes in prev layer: %d%n", prevLayerNodes.size());
+		System.out.printf("	Next Layer Node Weights:%n");
+		Node[] nextLayer =  new Node[nextLayerNodes.keySet().toArray().length];
+		for (int i = 0; i < nextLayer.length; i++) {
+			nextLayer[i] = (Node) nextLayerNodes.keySet().toArray()[i];
+		}
+		for (int i = 0; i < nextLayerNodes.size(); i++) {
+			System.out.printf("		- %f%n", nextLayerNodes.get(nextLayer[i]));
+		}
+		System.out.println();
+	}
 }
