@@ -4,6 +4,8 @@ public interface ActivationFunction {
 	
 	public double getOutput(double input);
 	
-	public double getGradientt(double input);
+	public double getDerivative(double input);
+	
+	public double getDerivative();
 
 }
