@@ -32,7 +32,7 @@ public class Node {
 	private int inputCounter = 0;
 	
 	/** The err node. */
-	private double errNode = 0;
+	private double partialErrPartialOut = 0;
 	
 	// Hash map contains the nodes in the next layer and the weights
 	/** The next layer nodes. */
@@ -42,6 +42,8 @@ public class Node {
 	/** The next layer nodes update map. */
 	// This map is going to be used for batch updating weights after back prop.
 	HashMap<Node, Double> nextLayerNodesUpdateMap = new HashMap<Node, Double>(); // The nodes that are in the next layer after this node. If map is empty, node is output
+	
+	ArrayList<Node> nextLayerNodesArrayList = new ArrayList<Node>();
 	
 	/** The prev layer nodes. */
 	// References to nodes in the previous layer to be used for back prop
@@ -74,6 +76,7 @@ public class Node {
 	public void addChild(Node n, double weight) {
 		nextLayerNodes.put(n, weight);
 		nextLayerNodesUpdateMap.put(n, 0.0);
+		nextLayerNodesArrayList.add(n);
 	}
 	
 	/**
@@ -90,8 +93,8 @@ public class Node {
 	 *
 	 * @param err the new err node
 	 */
-	public void setErrNode(Double err) {
-		errNode = err;
+	public void setPartialErrPartialOut(Double err) {
+		partialErrPartialOut = err;
 	}
 	
 	/**
@@ -104,13 +107,17 @@ public class Node {
 		return nextLayerNodes.get(connectedNode);
 	}
 	
+	public ArrayList<Node> getNextLayerNodes() {
+		return nextLayerNodesArrayList;
+	}
+	
 	/**
 	 * Gets the err node.
 	 *
 	 * @return the err node
 	 */
-	public double getErrNode() {
-		return errNode;
+	public double getPartialErrPartialOut() {
+		return partialErrPartialOut;
 	}
 	
 	/**

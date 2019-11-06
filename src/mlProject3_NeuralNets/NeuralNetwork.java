@@ -135,9 +135,9 @@ public class NeuralNetwork {
 		// Iterate through the output layer and find the total error of each output node with respect to 
 		for (int i = 0; i < outputLayer.size(); i++) {
 			Node curNode = outputLayer.get(i);
-			double errCurNoode = 0.5*Math.pow(targetValueOfFeatures.get(i) - curNode.getOutput(), 2);
-			curNode.setErrNode(errCurNoode);
+			double errCurNode = 0.5*Math.pow(targetValueOfFeatures.get(i) - curNode.getOutput(), 2);
 			double partialErrorPartialOut = -1*(targetValueOfFeatures.get(i) - curNode.getOutput());
+			curNode.setPartialErrPartialOut(partialErrorPartialOut);
 			double partialOutPartialNet = curNode.getActivationFunctionDerivative();
 			// Need to adjust each weight calculated to each output node
 			for (int j = 0; j < curNode.prevLayerNodes.size(); i++) {
@@ -154,7 +154,35 @@ public class NeuralNetwork {
 		boolean done = false;
 		ArrayList<Node> curLayer = outputLayer.get(0).prevLayerNodes; // The current hidden layer we are working on
 		while(!done) {
+			// Work backwards through hidden layers until the input layer is reached
+			for (Node curNode : curLayer) {
+				double partialErrPartialOut = 0;
+				
+				// Loop calculates the partial error total with respect to this node by summing over partial errors in the next layer
+				for (Node nextLayerNode : curNode.getNextLayerNodes()) {
+					partialErrPartialOut += nextLayerNode.getPartialErrPartialOut() * curNode.getConnectionWeight(nextLayerNode);
+				}
+				// Store this value to be used later
+				curNode.setPartialErrPartialOut(partialErrPartialOut);
+				// Now to calculate partial error of the cur node with respect to the net of current node
+				double partialOutPartialNet = curNode.getActivationFunctionDerivative();
+				
+				// Now to calculate updates to all of the weights going into cur node
+				for (Node prevLayerNode : curNode.prevLayerNodes) {
+					double partialNetPartialWeight = prevLayerNode.getOutput();
+					double partialErrPartialWeight = partialErrPartialOut * partialOutPartialNet * partialNetPartialWeight;
+					double weightUpdate = prevLayerNode.getConnectionWeight(curNode) - learningRate * partialErrPartialWeight;
+					prevLayerNode.addBatchUpdateValue(curNode, weightUpdate);
+				}
+			}
 			
+			// Switch the layer being worked on
+			curLayer = curLayer.get(0).prevLayerNodes;
+			// Check to see if done
+			if (curLayer.get(0).prevLayerNodes == null) {
+				// input layer has a null value for previous layer nodes, so we are done
+				done = true;
+			}
 		}
 	}
 
