@@ -131,7 +131,15 @@ public class NeuralNetwork {
 	 * 
 	 * @param targetValueOfFeatures A vector containing the target values for each of the output layer nodes
 	 */
-	public void backProp(ArrayList<Double> targetValueOfFeatures) {
+	public void backProp(ArrayList<Double> target) {
+		// transform the target value of features into the activation function space
+		ArrayList<Double> targetValueOfFeatures = new ArrayList<Double>();
+		for (int i = 0; i < target.size(); i++) {
+			double input = target.get(i);
+			//targetValueOfFeatures.add(Math.pow(Math.E, input)/(Math.pow(Math.E, input)+1)); // Needs to be changed to mesh with activation function
+			targetValueOfFeatures.add(input);
+			System.out.printf("Target value = %f%n", targetValueOfFeatures.get(i));
+		}
 		// Iterate through the output layer and find the total error of each output node with respect to 
 		for (int i = 0; i < outputLayer.size(); i++) {
 			Node curNode = outputLayer.get(i);
@@ -140,7 +148,7 @@ public class NeuralNetwork {
 			curNode.setPartialErrPartialOut(partialErrorPartialOut);
 			double partialOutPartialNet = curNode.getActivationFunctionDerivative();
 			// Need to adjust each weight calculated to each output node
-			for (int j = 0; j < curNode.prevLayerNodes.size(); i++) {
+			for (int j = 0; j < curNode.prevLayerNodes.size(); j++) {
 				// The weight of the connection between the current output node and a node in the previous layer
 				double weight = curNode.prevLayerNodes.get(j).getConnectionWeight(curNode); 
 				double partialErrorPartialWeight = partialErrorPartialOut * partialOutPartialNet * weight;
@@ -154,6 +162,7 @@ public class NeuralNetwork {
 		boolean done = false;
 		ArrayList<Node> curLayer = outputLayer.get(0).prevLayerNodes; // The current hidden layer we are working on
 		while(!done) {
+			System.out.printf("Working...%n");
 			// Work backwards through hidden layers until the input layer is reached
 			for (Node curNode : curLayer) {
 				double partialErrPartialOut = 0;
@@ -179,11 +188,22 @@ public class NeuralNetwork {
 			// Switch the layer being worked on
 			curLayer = curLayer.get(0).prevLayerNodes;
 			// Check to see if done
-			if (curLayer.get(0).prevLayerNodes == null) {
+			if (curLayer.get(0).prevLayerNodes.size() == 0) {
 				// input layer has a null value for previous layer nodes, so we are done
 				done = true;
 			}
 		}
+		
+		// Finally update all nodes to their new weight
+		curLayer = inputLayer;
+		while (curLayer.get(0).getNextLayerNodes().size() != 0) {
+			for (Node n : curLayer) {
+				n.batchUpdateWeights();
+			}
+			curLayer = curLayer.get(0).getNextLayerNodes();
+		}
+		//printAllNodeInfo();
 	}
+	
 
 }

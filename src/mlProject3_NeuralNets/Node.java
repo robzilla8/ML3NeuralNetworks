@@ -64,7 +64,7 @@ public class Node {
 	 * @param n the n
 	 */
 	public void addChild(Node n) {
-		addChild(n, (rand.nextDouble()*2-1)*40);
+		addChild(n, (rand.nextDouble()*0.01 - 0.01));
 	}
 	
 	/**
@@ -186,6 +186,19 @@ public class Node {
 		return preActivationFunctionOutput;
 	}
 	
+	public void batchUpdateWeights() {
+		Object[] keys = nextLayerNodes.keySet().toArray();
+		for (Object key : keys) {
+			Node nextLayerNode = (Node) key;
+			// System.out.printf("Updating weight from %f to %f%n", nextLayerNodes.get(nextLayerNode), nextLayerNodesUpdateMap.get(nextLayerNode));
+			double oldWeight = nextLayerNodes.get(nextLayerNode);
+			nextLayerNodes.put(nextLayerNode, nextLayerNodesUpdateMap.get(nextLayerNode));
+			double newWeight = nextLayerNodes.get(nextLayerNode);
+			double deltaWeight = oldWeight-newWeight;
+			if (deltaWeight != 0.0) System.out.printf("CHANGED!! Delta weight = %.10f%n", deltaWeight);
+		}
+	}
+	
 	/**
 	 * Gets the input.
 	 *
@@ -212,7 +225,8 @@ public class Node {
 	public void fire() {
 		if (nextLayerNodes.size() == 0) {
 			// todo: handle output layer
-			System.out.printf("Output = %f%n", output);
+			System.out.printf("	Output = %f%n", output);
+			System.out.printf("	Pre Activation Function Output = %f%n", preActivationFunctionOutput);
 			return;
 		}
 		Node[] nextNodes = new Node[nextLayerNodes.keySet().toArray().length];
