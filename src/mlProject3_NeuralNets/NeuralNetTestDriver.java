@@ -23,25 +23,31 @@ public class NeuralNetTestDriver {
 				arr.add(randInt3);
 				testData.add(arr);
 			}
-			NeuralNetwork nn = new NeuralNetwork(2, 3, 4, 1, false, 0.5);
+			NeuralNetwork nn = new NeuralNetwork(2, 20, 3, 1, false, 0.8);
 			nn.printAllNodeInfo();
 			ArrayList<Double> dubs = new ArrayList<Double>();
 			for (int i = 1; i <= 1000; i++) {
 				dubs.add(r.nextDouble());
 			}
-			for (int i = 0; i < 10000; i++) {
-				System.err.printf("BackProp iteration %d%n", i);
+			for (int i = 0; i < 100000; i++) {
+				System.out.printf("BackProp iteration %d%n", i);
 				ArrayList<Double> curVector = testData.get(r.nextInt(testData.size()));
 				nn.feedForward(curVector);
 				ArrayList<Double> target = new ArrayList<Double>();
 				target.add(curVector.get(2));
 				nn.backProp(target);
+				System.out.printf("%n%n%n%n%n");
 			}
 			
+			double pureError = 0;
 			for (ArrayList<Double> vector : testData) {
-				nn.feedForward(vector);
-				System.out.printf("Target: %f%n", vector.get(2));
+				ArrayList<Double> output = nn.feedForward(vector);
+				pureError += Math.abs(output.get(0) - vector.get(2));
+				System.out.printf("	Target: %f%n", vector.get(2));
 			}
+			nn.printAllNodeInfo();
+			System.out.printf("Pure error = %f%n", pureError);
+			
 		}
 	}
 }

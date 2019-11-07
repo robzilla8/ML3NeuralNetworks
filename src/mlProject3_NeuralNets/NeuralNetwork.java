@@ -112,13 +112,18 @@ public class NeuralNetwork {
 	 * @return the array list
 	 */
 	public ArrayList<Double> feedForward(ArrayList<Double> inputs) {
+		System.out.printf("-|-|-|-|Feed Forward-|-|-|-|%n");
 		for (int i = 0; i < inputLayer.size(); i++) {
+			System.out.printf("	Input is %f to node %d in the input layer%n", inputs.get(i), i);
 			inputLayer.get(i).getInput(inputs.get(i));
 		}
 		ArrayList<Double> outputs = new ArrayList<Double>();
 		for (int i = 0; i < outputLayer.size(); i++) {
 			Double output = outputLayer.get(i).getOutput();
 			outputs.add(output);
+		}
+		for (double output : outputs) {
+			System.out.printf("	Output = %f%n", output);
 		}
 		return outputs;
 	}
@@ -150,9 +155,9 @@ public class NeuralNetwork {
 			// Need to adjust each weight calculated to each output node
 			for (int j = 0; j < curNode.prevLayerNodes.size(); j++) {
 				// The weight of the connection between the current output node and a node in the previous layer
-				double weight = curNode.prevLayerNodes.get(j).getConnectionWeight(curNode); 
-				double partialErrorPartialWeight = partialErrorPartialOut * partialOutPartialNet * weight;
-				double newWeight = weight - learningRate * partialErrorPartialWeight;
+				double partialNetPartialWeight = curNode.prevLayerNodes.get(j).getOutput(); 
+				double partialErrorPartialWeight = partialErrorPartialOut * partialOutPartialNet * partialNetPartialWeight;
+				double newWeight = partialNetPartialWeight - learningRate * partialErrorPartialWeight;
 				// Store the new weight to be updated later
 				curNode.prevLayerNodes.get(j).addBatchUpdateValue(curNode, newWeight);
 			}
@@ -162,14 +167,14 @@ public class NeuralNetwork {
 		boolean done = false;
 		ArrayList<Node> curLayer = outputLayer.get(0).prevLayerNodes; // The current hidden layer we are working on
 		while(!done) {
-			System.out.printf("Working...%n");
 			// Work backwards through hidden layers until the input layer is reached
 			for (Node curNode : curLayer) {
 				double partialErrPartialOut = 0;
 				
 				// Loop calculates the partial error total with respect to this node by summing over partial errors in the next layer
 				for (Node nextLayerNode : curNode.getNextLayerNodes()) {
-					partialErrPartialOut += nextLayerNode.getPartialErrPartialOut() * curNode.getConnectionWeight(nextLayerNode);
+					double partialErrNextNodePartialOutThisNode = nextLayerNode.getPartialErrPartialOut() * nextLayerNode.getActivationFunctionDerivative();
+					partialErrPartialOut += partialErrNextNodePartialOutThisNode * curNode.getConnectionWeight(nextLayerNode);
 				}
 				// Store this value to be used later
 				curNode.setPartialErrPartialOut(partialErrPartialOut);

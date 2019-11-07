@@ -195,7 +195,7 @@ public class Node {
 			nextLayerNodes.put(nextLayerNode, nextLayerNodesUpdateMap.get(nextLayerNode));
 			double newWeight = nextLayerNodes.get(nextLayerNode);
 			double deltaWeight = oldWeight-newWeight;
-			if (deltaWeight != 0.0) System.out.printf("CHANGED!! Delta weight = %.10f%n", deltaWeight);
+			// if (deltaWeight != 0.0) System.out.printf("CHANGED!! Delta weight = %.10f%n", deltaWeight);
 		}
 	}
 	
@@ -217,6 +217,10 @@ public class Node {
 			//System.out.printf("Output = %f%n", output);
 			fire();
 		}
+		// test printing for input layer
+		if (prevLayerNodes.size() == 0) {
+			System.out.printf("	Input layer output = %f%n", output);
+		}
 	}
 	
 	/**
@@ -225,8 +229,8 @@ public class Node {
 	public void fire() {
 		if (nextLayerNodes.size() == 0) {
 			// todo: handle output layer
-			System.out.printf("	Output = %f%n", output);
-			System.out.printf("	Pre Activation Function Output = %f%n", preActivationFunctionOutput);
+//			System.out.printf("	Output = %f%n", output);
+//			System.out.printf("	Pre Activation Function Output = %f%n", preActivationFunctionOutput);
 			return;
 		}
 		Node[] nextNodes = new Node[nextLayerNodes.keySet().toArray().length];
