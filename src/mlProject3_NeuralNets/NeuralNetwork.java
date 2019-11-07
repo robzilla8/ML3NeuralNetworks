@@ -31,7 +31,7 @@ public class NeuralNetwork {
 		// make input layer
 		ArrayList<Node> prevLayer = new ArrayList<Node>();
 		for (int i = 0; i < inputLayerSize; i++) {
-			Node inputLayerNode = new Node(new GaussianActivation());
+			Node inputLayerNode = new Node(new LinearActivation());
 			inputLayer.add(inputLayerNode);
 			prevLayer.add(inputLayerNode);
 		}
@@ -41,7 +41,7 @@ public class NeuralNetwork {
 		for (int j = 0; j < numberOfHiddenLayers; j++) {
 			ArrayList<Node> currentLayer = new ArrayList<Node>();
 			for (int i = 0; i < hiddenLayerSize; i++) {
-				Node hiddenLayerNode = new Node(new GaussianActivation());
+				Node hiddenLayerNode = new Node(new LogisticFunction());
 				currentLayer.add(hiddenLayerNode);
 				// add children/parents
 				for (int p = 0; p < prevLayer.size(); p++) {
@@ -55,7 +55,7 @@ public class NeuralNetwork {
 		
 		// make output layer
 		for (int i = 0; i < outputLayerSize; i++) {
-			Node outputLayerNode = new Node(new GaussianActivation());
+			Node outputLayerNode = new Node(new LinearActivation());
 			outputLayer.add(outputLayerNode);
 			for (int j = 0; j < prevLayer.size(); j++) {
 				prevLayer.get(j).addChild(outputLayerNode);
@@ -89,6 +89,8 @@ public class NeuralNetwork {
 		while(!done) {
 			for (Node n : curLayer) {
 				n.printInfo();
+				System.out.printf("	Pre activation function input: %f%n", n.getPreActivationFunctionOutput());
+				System.out.printf("	After activattion function input: %f%n", n.getOutput());
 			}
 			if (curLayer[0].getChildren().length > 0) {
 				curLayer = curLayer[0].getChildren();
@@ -150,6 +152,7 @@ public class NeuralNetwork {
 			Node curNode = outputLayer.get(i);
 			double errCurNode = 0.5*Math.pow(targetValueOfFeatures.get(i) - curNode.getOutput(), 2);
 			double partialErrorPartialOut = -1*(targetValueOfFeatures.get(i) - curNode.getOutput());
+			System.out.printf("	Output Layer error = %f%n	partialErrorPartialOut = %f%n", errCurNode, partialErrorPartialOut);
 			curNode.setPartialErrPartialOut(partialErrorPartialOut);
 			double partialOutPartialNet = curNode.getActivationFunctionDerivative();
 			// Need to adjust each weight calculated to each output node
@@ -157,7 +160,7 @@ public class NeuralNetwork {
 				// The weight of the connection between the current output node and a node in the previous layer
 				double partialNetPartialWeight = curNode.prevLayerNodes.get(j).getOutput(); 
 				double partialErrorPartialWeight = partialErrorPartialOut * partialOutPartialNet * partialNetPartialWeight;
-				double newWeight = partialNetPartialWeight - learningRate * partialErrorPartialWeight;
+				double newWeight = curNode.prevLayerNodes.get(j).getConnectionWeight(curNode) - learningRate * partialErrorPartialWeight;
 				// Store the new weight to be updated later
 				curNode.prevLayerNodes.get(j).addBatchUpdateValue(curNode, newWeight);
 			}
@@ -174,6 +177,17 @@ public class NeuralNetwork {
 				// Loop calculates the partial error total with respect to this node by summing over partial errors in the next layer
 				for (Node nextLayerNode : curNode.getNextLayerNodes()) {
 					double partialErrNextNodePartialOutThisNode = nextLayerNode.getPartialErrPartialOut() * nextLayerNode.getActivationFunctionDerivative();
+					// Debug
+					if (nextLayerNode.getPartialErrPartialOut() == 0) {
+						System.out.printf("partial error partial out is 0 in the next layer node%n");
+					} else {
+						// System.out.println("No 0");
+					}
+					
+					if (nextLayerNode.getActivationFunctionDerivative() == 0) {
+						System.out.printf("activation function of next node is 0%n");
+					}
+					
 					partialErrPartialOut += partialErrNextNodePartialOutThisNode * curNode.getConnectionWeight(nextLayerNode);
 				}
 				// Store this value to be used later
@@ -181,7 +195,7 @@ public class NeuralNetwork {
 				// Now to calculate partial error of the cur node with respect to the net of current node
 				double partialOutPartialNet = curNode.getActivationFunctionDerivative();
 				
-				// Now to calculate updates to all of the weights going into cur node
+				// Now to calculate updates to all of the weights going into our node
 				for (Node prevLayerNode : curNode.prevLayerNodes) {
 					double partialNetPartialWeight = prevLayerNode.getOutput();
 					double partialErrPartialWeight = partialErrPartialOut * partialOutPartialNet * partialNetPartialWeight;

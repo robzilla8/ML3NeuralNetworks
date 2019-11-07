@@ -1,11 +1,12 @@
 package mlProject3_NeuralNets;
 
-public class GaussianActivation implements ActivationFunction {
+public class LogisticFunction implements ActivationFunction {
+
 	private double var;
 	@Override
 	public double getOutput(double input) {
 		// Change the function below, it's just a sigmoid for testing
-		var = Math.pow(Math.E, input)/(Math.pow(Math.E, input)+1);
+		var = 1/(Math.pow(Math.E, -1*input)+1);
 		return var;
 	}
 

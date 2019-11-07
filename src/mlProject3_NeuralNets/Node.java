@@ -34,6 +34,9 @@ public class Node {
 	/** The err node. */
 	private double partialErrPartialOut = 0;
 	
+	/** Delete latter*/
+	ArrayList<Double> inputs = new ArrayList<Double>();
+	
 	// Hash map contains the nodes in the next layer and the weights
 	/** The next layer nodes. */
 	// Use a node in the next layer as a key to get the weight between this node and the node being queried
@@ -64,7 +67,7 @@ public class Node {
 	 * @param n the n
 	 */
 	public void addChild(Node n) {
-		addChild(n, (rand.nextDouble()*0.01 - 0.01));
+		addChild(n, (rand.nextDouble()*0.02 - 0.01));
 	}
 	
 	/**
@@ -195,7 +198,22 @@ public class Node {
 			nextLayerNodes.put(nextLayerNode, nextLayerNodesUpdateMap.get(nextLayerNode));
 			double newWeight = nextLayerNodes.get(nextLayerNode);
 			double deltaWeight = oldWeight-newWeight;
-			// if (deltaWeight != 0.0) System.out.printf("CHANGED!! Delta weight = %.10f%n", deltaWeight);
+			System.out.printf("Changed from %f to %f%n", oldWeight, newWeight);
+			if (deltaWeight > 0.0) {
+				if (nextLayerNodesArrayList.get(0).nextLayerNodes.size() == 0) {
+					System.out.print("Hidden Node connected to output layer ");
+				} else {
+					System.out.print("Node connected to another hidden layer ");
+				}
+				System.out.printf ("Increased!! Delta weight = %.10f%n", deltaWeight);
+			} else if (deltaWeight < 0.0) {
+				if (nextLayerNodesArrayList.get(0).nextLayerNodes.size() == 0) {
+					System.out.print("Hidden Node connected to output layer ");
+				} else {
+					System.out.print("Node connected to another hidden layer ");
+				}
+				System.out.printf("Decreased!! Delta weight = %.10f%n", deltaWeight);
+			}
 		}
 	}
 	
@@ -206,15 +224,27 @@ public class Node {
 	 * @return the input
 	 */
 	public void getInput(double singleNodeInput) {
+		inputs.add(singleNodeInput);
 		input += singleNodeInput;
 		inputCounter++;
 		if (inputCounter >= prevLayerNodes.size()) {
 			//System.out.printf("Input = %f%n", input);
-			output = nodeActivationFunction.getOutput(input);
-			inputCounter = 0;
+//			if (prevLayerNodes.size() == 0) {
+//				// Handle the input layer, no activation function necessary
+//				output = input;
+//			} else {
+				output = nodeActivationFunction.getOutput(input);
+//			}
 			preActivationFunctionOutput = input;
 			input = 0;
 			//System.out.printf("Output = %f%n", output);
+//			System.out.printf("Firing...input counter = %d%n", inputCounter);
+//			for (int i = 0; i < inputs.size(); i++) {
+//				System.out.printf("%f,", inputs.get(i));
+//			}
+//			System.out.println();
+			inputs.clear();
+			inputCounter = 0;
 			fire();
 		}
 		// test printing for input layer
@@ -230,7 +260,7 @@ public class Node {
 		if (nextLayerNodes.size() == 0) {
 			// todo: handle output layer
 //			System.out.printf("	Output = %f%n", output);
-//			System.out.printf("	Pre Activation Function Output = %f%n", preActivationFunctionOutput);
+			System.out.printf("	Pre Activation Function Output = %f%n", preActivationFunctionOutput);
 			return;
 		}
 		Node[] nextNodes = new Node[nextLayerNodes.keySet().toArray().length];
