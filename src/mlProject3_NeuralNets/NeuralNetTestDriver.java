@@ -9,14 +9,21 @@ public class NeuralNetTestDriver {
 		test(1);
 	}
 	
+	/**
+	 * Test. Tests the neural network by generating a randomized test set and attempting to calculate the difference
+	 * 
+	 * The different parameters to the neural network are all initialized in this method as well
+	 *
+	 * @param iterations the iterations or number of times that the method should run.
+	 */
 	private static void test(int iterations) {
 		for (int j = 0; j < iterations; j++) {
 			Random r = new Random();
 			ArrayList<ArrayList<Double>> testData = new ArrayList<ArrayList<Double>>();
-			for (int i = 0; i < 35; i++) {
+			for (int i = 0; i < 4; i++) {
 				double randInt1 = (r.nextInt(200) + 200) /*/ 100.0*/; // random value between 0.25 and 1
 				double randInt2 = r.nextInt(200) - 300 /*/ 100.0*/; // random value between 0.0 and 0.5
-				double randInt3 = randInt1 - randInt2;
+				double randInt3 = randInt1 -  randInt2;
 			//	randInt3 = 0.025;
 				ArrayList<Double> arr = new ArrayList<Double>();
 				arr.add(randInt1);
@@ -51,13 +58,13 @@ public class NeuralNetTestDriver {
 //			testData.add(test3);
 //			testData.add(test4);
 			
-			NeuralNetwork nn = new NeuralNetwork(2, 4, 1, 1, false, 0.04);
+			NeuralNetwork nn = new NeuralNetwork(2, 2, 4, 1, false, 0.04);
 			nn.printAllNodeInfo();
 			ArrayList<Double> dubs = new ArrayList<Double>();
 			for (int i = 1; i <= 1000; i++) {
 				dubs.add(r.nextDouble());
 			}
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 400; i++) {
 				System.out.printf("BackProp iteration %d%n", i);
 				ArrayList<Integer> indeces = new ArrayList<Integer>();
 				for (int p = 0; p < testData.size(); p++) {
@@ -77,16 +84,17 @@ public class NeuralNetTestDriver {
 				}
 			}
 			
-			double pureError = 0;
+			double pureError = 0; // just a sum of the error on predictions. Not a meaningful metric in its current form
 			for (ArrayList<Double> vector : testData) {
 				ArrayList<Double> output = nn.feedForward(vector);
 				pureError += Math.abs(output.get(0) - vector.get(2));
 				System.out.printf("	Target: %f%n", vector.get(2));
 	//			nn.printAllNodeInfo();
 			}
-			//nn.printAllNodeInfo();
+			nn.printAllNodeInfo();
 			System.out.printf("Pure error = %f%n", pureError);
 			
+			// calculate the mean of the test set to see if that's what the neural network was converging on.
 			double avg = 0;
 			for (int i = 0; i < testData.size(); i++) {
 				avg += testData.get(i).get(testData.get(i).size() - 1);

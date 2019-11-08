@@ -7,6 +7,8 @@ import java.util.Random;
 // TODO: Auto-generated Javadoc
 /**
  * The Class Node.
+ * Nodes connected together in the right way comprise the neural network, and the neural network class performs various operations on the
+ * nodes in order to do calculations with the neural network.
  */
 public class Node {
 	
@@ -16,7 +18,7 @@ public class Node {
 	/** The rand. */
 	private Random rand = new Random(); // random generator
 	
-	/** The mutable. */
+	/** The mutable. Intended to be used to creat bias nodes */
 	private boolean mutable = true;
 	
 	/** The input. */
@@ -25,16 +27,16 @@ public class Node {
 	/** The output. */
 	private double output = 0;
 	
-	/** The pre activation function output. */
+	/** The pre activation function output. Output before an activation function is applied to this node */
 	private double preActivationFunctionOutput = 0;
 	
-	/** The input counter. */
+	/** The input counter. Used to count when all nodes in the previous layer have fired and allows this node to fire when a certain threshold has been reached */
 	private int inputCounter = 0;
 	
-	/** The err node. */
+	/** The partial derivative of err with respect to the output of this node */
 	private double partialErrPartialOut = 0;
 	
-	/** Delete latter*/
+	/**  Delete latter. */
 	ArrayList<Double> inputs = new ArrayList<Double>();
 	
 	// Hash map contains the nodes in the next layer and the weights
@@ -46,6 +48,7 @@ public class Node {
 	// This map is going to be used for batch updating weights after back prop.
 	HashMap<Node, Double> nextLayerNodesUpdateMap = new HashMap<Node, Double>(); // The nodes that are in the next layer after this node. If map is empty, node is output
 	
+	/** The next layer nodes array list. */
 	ArrayList<Node> nextLayerNodesArrayList = new ArrayList<Node>();
 	
 	/** The prev layer nodes. */
@@ -55,16 +58,16 @@ public class Node {
 	/**
 	 * Instantiates a new node.
 	 *
-	 * @param f the f
+	 * @param f the activation function that this node will be use
 	 */
 	public Node(ActivationFunction f) {
 		nodeActivationFunction = f;
 	}
 	
 	/**
-	 * Adds the child.
+	 * Adds a child (next layer node) with a random weight in the range [-0.01,0.01]
 	 *
-	 * @param n the n
+	 * @param n the child node to be added
 	 */
 	public void addChild(Node n) {
 		addChild(n, (rand.nextDouble()*0.02 - 0.01));
@@ -73,7 +76,7 @@ public class Node {
 	/**
 	 * Adds the child.
 	 *
-	 * @param n the n
+	 * @param n the child node (next layer node) to be added
 	 * @param weight the weight
 	 */
 	public void addChild(Node n, double weight) {
@@ -83,7 +86,7 @@ public class Node {
 	}
 	
 	/**
-	 * Adds the parent.
+	 * Adds the parent (a node in the previous layer).
 	 *
 	 * @param parent the parent
 	 */
@@ -92,7 +95,7 @@ public class Node {
 	}
 	
 	/**
-	 * Sets the err node.
+	 * Sets a value for the partial derivative of error with respect to the output of the node.
 	 *
 	 * @param err the new err node
 	 */
@@ -101,7 +104,7 @@ public class Node {
 	}
 	
 	/**
-	 * Gets the connection weight.
+	 * Gets the connection weight between this node and a node in the next layer
 	 *
 	 * @param connectedNode the connected node
 	 * @return the connection weight
@@ -110,12 +113,17 @@ public class Node {
 		return nextLayerNodes.get(connectedNode);
 	}
 	
+	/**
+	 * Gets the next layer nodes.
+	 *
+	 * @return the next layer nodes
+	 */
 	public ArrayList<Node> getNextLayerNodes() {
 		return nextLayerNodesArrayList;
 	}
 	
 	/**
-	 * Gets the err node.
+	 * Gets the error of this node. A partial derivative of the error with respect to the output of this node.
 	 *
 	 * @return the err node
 	 */
@@ -143,9 +151,9 @@ public class Node {
 	}
 	
 	/**
-	 * Gets the children.
+	 * Gets the children of this node or nodes in the next layer.
 	 *
-	 * @return the children
+	 * @return the children of this node (nodes in the next layer)
 	 */
 	public Node[] getChildren() {
 		Node[] nextLayer = new Node[nextLayerNodes.keySet().toArray().length];
@@ -156,7 +164,8 @@ public class Node {
 	}
 	
 	/**
-	 * Change mutable.
+	 * Change mutable. Whether a node can have its values changed or not
+	 * It was intended that this would be used for bias nodes
 	 */
 	public void changeMutable() {
 		mutable = !mutable;
@@ -189,6 +198,10 @@ public class Node {
 		return preActivationFunctionOutput;
 	}
 	
+	/**
+	 * Batch update weights. After an iteration of back prop this method is called and the nodes weights are updated to
+	 * the new values determined by back prop
+	 */
 	public void batchUpdateWeights() {
 		Object[] keys = nextLayerNodes.keySet().toArray();
 		for (Object key : keys) {
@@ -218,12 +231,14 @@ public class Node {
 	}
 	
 	/**
-	 * Gets the input.
+	 * Adds an input
+	 * When the same number of inputs have been reached as are connected to this node
+	 * it "fires" and sends the nodes in the next layer it's values.
 	 *
-	 * @param singleNodeInput the single node input
-	 * @return the input
+	 * @param singleNodeInput the single node input (a weight * activation of a node in the previous layer)
+	 * @return n/a
 	 */
-	public void getInput(double singleNodeInput) {
+	public void addInput(double singleNodeInput) {
 		inputs.add(singleNodeInput);
 		input += singleNodeInput;
 		inputCounter++;
@@ -254,7 +269,7 @@ public class Node {
 	}
 	
 	/**
-	 * Fire.
+	 * Fire. Send the output of this node multiplied by corresponding weights to the nodes in the next layer
 	 */
 	public void fire() {
 		if (nextLayerNodes.size() == 0) {
@@ -269,12 +284,12 @@ public class Node {
 		}
 		for (int i = 0; i < nextLayerNodes.size(); i++) {
 			// sends the weight of the connection to a node in the next layer * the output of the activation function from this layer
-			nextNodes[i].getInput(nextLayerNodes.get(nextNodes[i])*output);
+			nextNodes[i].addInput(nextLayerNodes.get(nextNodes[i])*output);
 		}
 	}
 	
 	/**
-	 * Prints the info.
+	 * Prints miscellaneous node info.
 	 */
 	public void printInfo() {
 		String nodeType = "";

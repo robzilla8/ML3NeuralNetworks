@@ -110,14 +110,14 @@ public class NeuralNetwork {
 	/**
 	 * Feed forward.
 	 *
-	 * @param inputs the inputs
-	 * @return the array list
+	 * @param inputs the inputs to the input layer
+	 * @return an array list containing the results from the output node of the layer
 	 */
 	public ArrayList<Double> feedForward(ArrayList<Double> inputs) {
 		System.out.printf("-|-|-|-|Feed Forward-|-|-|-|%n");
 		for (int i = 0; i < inputLayer.size(); i++) {
 			System.out.printf("	Input is %f to node %d in the input layer%n", inputs.get(i), i);
-			inputLayer.get(i).getInput(inputs.get(i));
+			inputLayer.get(i).addInput(inputs.get(i));
 		}
 		ArrayList<Double> outputs = new ArrayList<Double>();
 		for (int i = 0; i < outputLayer.size(); i++) {
@@ -178,17 +178,17 @@ public class NeuralNetwork {
 				for (Node nextLayerNode : curNode.getNextLayerNodes()) {
 					double partialErrNextNodePartialOutThisNode = nextLayerNode.getPartialErrPartialOut() * nextLayerNode.getActivationFunctionDerivative();
 					// Debug
-					if (nextLayerNode.getPartialErrPartialOut() == 0) {
-						System.out.printf("partial error partial out is 0 in the next layer node%n");
-					} else {
-						// System.out.println("No 0");
-					}
+//					if (nextLayerNode.getPartialErrPartialOut() == 0) {
+//						System.out.printf("partial error partial out is 0 in the next layer node%n");
+//					} else {
+//						// System.out.println("No 0");
+//					}
 					
 					if (nextLayerNode.getActivationFunctionDerivative() == 0) {
 						System.out.printf("activation function of next node is 0%n");
 					}
 					
-					partialErrPartialOut += partialErrNextNodePartialOutThisNode * curNode.getConnectionWeight(nextLayerNode);
+					partialErrPartialOut += (partialErrNextNodePartialOutThisNode * curNode.getConnectionWeight(nextLayerNode));
 				}
 				// Store this value to be used later
 				curNode.setPartialErrPartialOut(partialErrPartialOut);
