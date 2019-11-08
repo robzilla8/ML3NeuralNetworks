@@ -51,7 +51,7 @@ public class NeuralNetTestDriver {
 //			testData.add(test3);
 //			testData.add(test4);
 			
-			NeuralNetwork nn = new NeuralNetwork(2, 4, 2, 1, false, 0.04);
+			NeuralNetwork nn = new NeuralNetwork(2, 4, 1, 1, false, 0.04);
 			nn.printAllNodeInfo();
 			ArrayList<Double> dubs = new ArrayList<Double>();
 			for (int i = 1; i <= 1000; i++) {

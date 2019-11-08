@@ -277,7 +277,15 @@ public class Node {
 	 * Prints the info.
 	 */
 	public void printInfo() {
-		System.out.printf("%n-----Node Values-----%n");
+		String nodeType = "";
+		if (nextLayerNodes.size() == 0) {
+			nodeType = "Output Node";
+		} else if (prevLayerNodes.size() == 0) {
+			nodeType = "Input Node";
+		} else {
+			nodeType = "Hidden Node";
+		}
+		System.out.printf("%n-----Node Values %s-----%n", nodeType);
 		System.out.printf("	Number of nodes in next layer: %d%n", nextLayerNodes.size());
 		System.out.printf("	Number of nodes in prev layer: %d%n", prevLayerNodes.size());
 		System.out.printf("	Next Layer Node Weights:%n");
@@ -288,6 +296,6 @@ public class Node {
 		for (int i = 0; i < nextLayerNodes.size(); i++) {
 			System.out.printf("		# %f%n", nextLayerNodes.get(nextLayer[i]));
 		}
-		System.out.println();
+		System.out.printf("%n	Partial err partial out = %f%n%n", getPartialErrPartialOut());
 	}
 }
